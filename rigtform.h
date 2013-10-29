@@ -11,9 +11,10 @@
 class RigTForm {
   Cvec3 t_; // translation component
   Quat r_;  // rotation component represented as a quaternion
+  float s_; // scale component
 
 public:
-  RigTForm() : t_(0) {
+  RigTForm() : t_(0), s_(0) {
     assert(norm2(Quat(1,0,0,0) - r_) < CS175_EPS2);
   }
 
@@ -50,6 +51,10 @@ public:
     return *this;
   }
 
+  RigTForm& setScale(const float& s) {
+	  s_ = s;
+  }
+
   RigTForm& setRotation(const Quat& r) {
     r_ = r;
     return *this;
@@ -65,11 +70,14 @@ public:
 	  return RigTForm(t_ + Cvec3(r_ * Cvec4(a.t_,0)),r_ * a.r_);
   }
 
-  static Matrix4 makeTRmatrix(const RigTForm& rbt)
+  static Matrix4 makeTRmatrix(const RigTForm& rbt, Matrix4 s)
 	{
 		Matrix4 t = Matrix4::makeTranslation(rbt.getTranslation());
 		Matrix4 r = quatToMatrix(rbt.getRotation());
-		return t * r;
+		Matrix4 world = s * r;
+		world *= t;
+
+		return world;
 	}
 };
 
